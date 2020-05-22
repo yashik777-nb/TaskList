@@ -10,6 +10,8 @@ const taskInput = document.querySelector("#task");
 loadEventListeners();
 
 function loadEventListeners() {
+  // DOM load Event
+  document.addEventListener("DOMContentLoaded", getTasks);
   // Add Task Event
   form.addEventListener("submit", addTask);
   // Remove Task Event
@@ -44,6 +46,9 @@ function addTask(e) {
   // Append li to Ul
   taskList.appendChild(li);
 
+  // Local Storage
+  storeTaskInLocalStorage(taskInput.value);
+
   // Clear the Input
   taskInput.value = "";
 
@@ -56,6 +61,8 @@ function removeTask(e) {
     // console.log(e.target);
     if (confirm("Are You Sure ?")) {
       e.target.parentElement.parentElement.remove();
+      // Remove Task from Local Storage
+      removeTaskFromLocalStorage(e.target.parentElement.parentElement);
     }
   }
 }
@@ -69,6 +76,9 @@ function clearTasks(e) {
   while (taskList.firstChild) {
     taskList.removeChild(taskList.firstChild);
   }
+
+  // Clear Tasks from Local storage
+  clearTasksFromLocalStorage();
 }
 
 // Filter Tasks
@@ -82,4 +92,53 @@ function filterTasks(e) {
       task.style.display = "none";
     }
   });
+}
+
+// Local Storage
+function storeTaskInLocalStorage(taskText) {
+  let tasks;
+  if (localStorage.getItem("tasks") == null) {
+    tasks = [];
+  } else {
+    tasks = JSON.parse(localStorage.getItem("tasks"));
+  }
+  tasks.push(taskText);
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+// Get Tasks
+function getTasks() {
+  let tasks;
+  if (localStorage.getItem("tasks") == null) tasks = [];
+  else tasks = JSON.parse(localStorage.getItem("tasks"));
+
+  tasks.forEach(function (task) {
+    const li = document.createElement("li");
+    li.className = "collection-item";
+    li.appendChild(document.createTextNode(task));
+    const link = document.createElement("a");
+    link.className = "delete-item secondary-content";
+    link.innerHTML = '<i class="fa fa-remove"></i>';
+    li.appendChild(link);
+    taskList.appendChild(li);
+  });
+}
+
+// Remove Task From Local Storage
+function removeTaskFromLocalStorage(taskID) {
+  let tasks;
+  if (localStorage.getItem("tasks") === null) tasks = [];
+  else tasks = JSON.parse(localStorage.getItem("tasks"));
+
+  tasks.forEach(function (task, index) {
+    if (taskID.textContent === task) {
+      tasks.splice(index, 1);
+    }
+  });
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+// Clear Tasks from Local Storage
+function clearTasksFromLocalStorage() {
+  localStorage.clear();
 }
